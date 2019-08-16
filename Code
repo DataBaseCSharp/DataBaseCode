@@ -1,0 +1,98 @@
+
+	C# Access Baglanti
+
+using System.Data.OleDb;
+
+OleDbConnection baglanti = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=database_adi.accdb"); // Veritabani Baglanti
+
+
+private void Form1_Load(object sender, EventArgs e) // Veritabanı baglanti kontrol
+{
+    try
+    {
+        baglanti.Open();
+		
+        baglanti.Close();
+    }
+    catch
+    {
+        MessageBox.Show("Veritabanı ile baglantı kurulamıyor!", "Hata");
+        this.Close();
+    }
+}
+
+private void button1_Click(object sender, EventArgs e) // Giris Kontrol
+        {
+            baglanti.Open();
+			
+            OleDbCommand komut = new OleDbCommand("SELECT * FROM kisiler where uyeadi=@uyeadi and uyesifre=@uyesifre", baglanti);
+            komut.Parameters.Add("@uyeadi", textBox1.Text);
+            komut.Parameters.Add("@uyesifre", textBox2.Text);
+
+            try
+            {
+                int id = int.Parse(komut.ExecuteScalar().ToString());
+
+                MessageBox.Show("Giriş başarılı");
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Giriş Başarısız");
+            }
+			
+            baglanti.Close();
+        }
+
+OleDbConnection baglanti = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\uye.accdb");
+OleDbCommand komut = new OleDbCommand();
+OleDbDataAdapter adtr = new OleDbDataAdapter();
+DataSet ds = new DataSet();
+
+private void button1_Click(object sender, EventArgs e) // Veritabani Veri Ekleme
+        {
+            if (username.Text != "" && email.Text != "" && password.Text != "")
+            {
+                if (password.Text == password_.Text)
+                {
+                    komut.Connection = baglanti;
+                    komut.CommandText = "Insert Into kisiler(uyeadi,uyesifre,email) Values ('" + username.Text + "','" + password.Text + "','" + email.Text + "')";
+                    baglanti.Open();
+                    komut.ExecuteNonQuery();
+                    komut.Dispose();
+                    baglanti.Close();
+                    MessageBox.Show("Kayıt Tamamlandı!");
+                    ds.Clear();
+
+                    this.Close();
+                }
+                else MessageBox.Show("Şifreler eşleşmiyor!");
+            }
+            else MessageBox.Show("Lütmen tüm bilgileri doldurunuz.");
+        }
+
+void sil() // ID göre Veri sil
+        {
+            DialogResult c;
+            c = MessageBox.Show("Silmek istediğinizden emin misiniz?", "Uyarı!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (c == DialogResult.Yes)
+            {
+                baglanti.Open();
+                komut.Connection = baglanti;
+                komut.CommandText = "Delete from kisiler where id=" + textBox1.Text + "";
+                komut.ExecuteNonQuery();
+                komut.Dispose();
+                baglanti.Close();
+                ds.Clear();
+                listele();
+            }
+        }
+
+void Ara() // ID göre Veri ara
+        {
+            adtr = new OleDbDataAdapter("Select * from kisiler where id like '" + textBox2.Text + "%'", baglanti);
+            ds = new DataSet();
+            baglanti.Open();
+            adtr.Fill(ds, "kisiler");
+            dataGridView1.DataSource = ds.Tables["kisiler"];
+            baglanti.Close();
+        }
